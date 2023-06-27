@@ -1,0 +1,136 @@
+# 315CAb_StanMihai-Catalin
+
+# Mod de functionare
+	Programul are la baza sa o structura:
+1. pic - Abreviere pentru picture, va memora variabile necesare pentru a recrea
+o poza de tip .pgm sau .ppm:
+	1.1 magic - Variabila de tip intreg pentru a memora tipul pozei
+	1.2 *sizes - Tablou unidimensional intreg pentru a memora dimensiunile
+	pozei / a matricii de pixeli
+	1.3 **pixels - Tablou bidimensional intreg pentru a memora valorile
+	pixelilor din poza
+	1.4 range - Variabila de tip intreg pentru a memora
+	1.5 nrp - Variabila de tip intreg pentru a memora numarul de canale de
+	culoare ale pozei curente
+	1.6 **selected - Tablou bidimensional intreg pentru a memora valorile
+	pixelilor selectati din poza
+	1.7 *ssize - Tablou unidimensional intreg pentru a memora dimensiunile
+	pozei / a matricii de pixeli
+	1.8 - 1.11 - x1/y1/x2/y1 - Coordonatele marginilor selectiei pozei
+
+	In main se va declara o structura neinitializata in care se va memora
+ulterior poza curenta. Se va citi un string de la stdin care va trece printr-o
+insiruire de structuri de decizie alternativa pentru a se decide ce operatie va
+fi efectuata. Ulterior in functie de caz se vor putea citi in interiorul
+functiilor ceilalti parametrii.
+	Majoritatea functiilor care presupun lucrul cu valorile din matrice au
+fost facute in structuri de tipul int * sau int ** pentru a lucra cu o copie
+a pozei. Exceptie facand functia de equalize in care doar am mutat valorile din
+matricea cu valorile modificate in matricea de pixeli curenta.
+
+# Operatii implementate
+# load
+	Functia este apelata la introducerea string-ului 'LOAD' si incarca o
+poza in structura. Se va citi numele fisierului din care se doreste a se face
+citirea, iar apoi prin apelarea functiilor de 'magicword', 'sizes', 'range' si
+'pixel_mat' / 'pixel_mat_bin' se vor incarca in structura elementele necesare
+modificarii si salvarii unei poze in format .ppm sau .pgm.
+
+# magicword
+	Functia este apelata in interiorul functiei de 'LOAD' si va citi din
+fisier un sir de caractere. In cazul in care sirul citit incepe cu '#' acesta
+va fi considerat un comentariu si sarit. In caz contrar, se va lua al doilea
+caracter din sir si va fi transformat intr-un intreg, care va fi si tipul
+pozei citite.
+
+# sizes
+	Functia este similara celei de magicword, doar ca va citi 2 valori
+intregi din fisier, pe care le va transforma in dimensiunile pozei, salvate
+ca elemente intregi intr-un tablou unidimensional.
+
+# range
+	Functie similara celor doua mentionate anterior, folosita pentru a
+citi si salva valoarea maxima a unui pixel din matrice.
+
+# pixel_mat
+	Functia este apelata in interiorul functiei de 'LOAD' si va citi
+elementele unei matrici de pixeli dintr-un fisier de tip .txt. Dupa citirea
+comentariilor, primul element din matrice este initial un char asa ca va fi
+convertit in int si salvat pe pozitia [0][0]. Mai departe se vor citi
+elementele intregi din restul matricii, iar tabloul bidimensional alocat va fi
+returnat in functia de 'LOAD'.
+
+# pixel_mat_bin
+	Functia este similara celei de 'pixel_mat', doar ca va citi elementele
+dintr-un fisier binar.
+Probleme intampinate: Initial citirea din fisierul binar a fost mai dificila
+din cauza necesitatii tipului de date unsigned char si a transformarii sale
+in int. De obicei citeam o matrice cu multe '?' sau patratele rosii.
+
+# select_pic
+	Functia este apelata la introducerea string-ului 'SELECT' si va selecta
+o zona a imaginii incarcate. Aceasta poate fie sa treaca mai departe in functia
+de select_all sau sa memoreze o parte din poza curenta dupa niste coordonate
+date. Coordonatele sunt citite cu ajutorul functiilor de read_parameters si
+transform_parameter.
+	Selectia curenta este golita (free) si apoi este reinitializata dupa
+noile dimensiuni, urmand ca mai apoi sa fie introduse valorile din intervalul
+de coordonate cerut in matricea de selectie.
+
+# read_parameters
+	Functia este apelata in interiorul operatiei de 'SELECT' si este
+folosita pentru a citi valorile coordonatelor date x1, y1, x2, y2, dar si a le
+transforma din char in int cu ajutorul functiei de 'transform_parameter'.
+
+# select_all
+	Subfunctie a functiei de 'select_pic', folosita in cazul selectarii
+intregii imagini. Functionalitatea sa e similara cu cea a functiei de select
+dupa coordonate.
+
+# histogram
+	Functia de afisare a histogramei imaginii curente. Se calculeaza
+frecventa fiecarei valoare pe binul de care apartine, se cauta frecventa maxima
+se calculeaza numarul de stele si se afiseaza histograma.
+
+# equalize
+	Functia de egalizare a valorilor pixelilor imaginii curente. Se
+calculeaza frecventa ficarei valori din matricea de pixeli. Apoi se face
+totalul sumei frecventelor pentru fiecare indice, care va fi folosit ulterior
+in calcularea noii valori a fiecarui pixel din noua matrice. La final valorile
+sunt puse inapoi in matricea de pixeli din structura si tabloul alocat in
+functie este golit.
+
+# crop
+	Functia este apelata la introducerea string-ului 'CROP' si are un nume
+suficient de sugestiv. Goleste matricea curenta, si o aloca folosind
+dimensiunile selectiei curente, apoi muta valorile din selectie in noua matrice
+
+# save
+	Functia este apelata la intrdoucerea string-ului 'SAVE' si are nevoie
+de numele/path-ul fisierului in care imaginea curenta se va salva. Salvarea
+se face similar cu citirea, doar ca ignoram comentariile.
+
+# apply
+	Functia este apelata la introducerea string-ului 'APPLY' si va cere ca
+input parametrul functiei cerute:
+	1. EDGE pentru edge_detection
+	2. SHARPEN pentru sharpen
+	3. BLUR pentru box_blur
+	4. GAUSSIAN_BLUR pentru gaussian_blur
+
+# edge_detection
+	Functia este apelata in interiorul operatiei de 'APPLY' si va aplica
+nucleul de imagine corespunzator selectiei curente. Se muta valorile matricii
+curente intr-un alt tablou unidimensional care va fi returnat la finalul
+functiei, iar apoi se vor calcula valorile fiecarui pixel. In cazul selectiei
+intregii imaginii se vor ignora marginile.
+
+# sharpen ; box_blur ; gaussian_blur
+	Functiile sunt similare celei de edge detection, doar ca vor folosi
+un nucleu de imagine diferit pentru fiecare functie.
+
+# rotate
+	Functia este apelata la introducerea string-ului 'ROTATE' si va cere ca
+parametru un unghi sub care sa fie rotita imaginea. Cazurile default sunt 0 si
+360 de grade, iar pentru rotatiile de 90, 180 si 270 de grade se vor folosi
+functii care transpun imaginea dupa selectia si tipul acesteia.
